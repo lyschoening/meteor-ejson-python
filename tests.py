@@ -33,6 +33,14 @@ class EJSONTestCase(unittest.TestCase):
                              "$date": datetime.datetime(1970, 1, 1, 0, 0, 32, tzinfo=ejson.timezone.utc)
                          }, ejson.loads('{"$escape": {"$date": {"$date": 32000}}}'))
 
+    def test_date(self):
+        s1 = ejson.dumps(datetime.date(2015, 1, 25))
+        self.assertEqual('{"$date": 1422144000000}', s1)
+        self.assertEqual(datetime.datetime(2015, 1, 25, tzinfo=ejson.timezone.utc), ejson.loads(s1))
+        s2 = ejson.dumps(datetime.datetime(2015, 1, 25, 10, 30, 1, tzinfo=ejson.timezone.utc))
+        self.assertEqual('{"$date": 1422181801000}', s2)
+        self.assertEqual(datetime.datetime(2015, 1, 25, 10, 30, 1, tzinfo=ejson.timezone.utc), ejson.loads(s2))
+
     def test_binary(self):
         if six.PY3:
             s = ejson.dumps([six.binary_type('foo', 'ascii'), 'foo'])

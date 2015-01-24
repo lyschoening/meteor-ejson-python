@@ -62,7 +62,9 @@ class EJSONEncoder(json.JSONEncoder):
                     if markers is not None:
                         del markers[marker_id]
 
-            # TODO datetime.date
+            if isinstance(o, date):
+                return {"$date": int(calendar.timegm(o.timetuple()) * 1000)}
+
             if isinstance(o, datetime):
                 return {"$date": int(calendar.timegm(o.utctimetuple()) * 1000)}
 
