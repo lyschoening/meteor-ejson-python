@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
     name='meteor-json',
     version='1.0.0',
-    packages=['ejson'],
+    packages=find_packages(exclude=['*tests*']),
     url='',
     license='MIT',
     author='Lars Schöning',
