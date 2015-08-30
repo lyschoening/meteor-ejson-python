@@ -1,5 +1,6 @@
 from base64 import b64decode, b64encode
 import calendar
+from collections import OrderedDict
 from datetime import date, datetime
 import json
 import six
@@ -53,9 +54,10 @@ class EJSONEncoder(json.JSONEncoder):
                     markers[marker_id] = o
                 try:
                     if isinstance(o, dict):
+                        dict_cls = OrderedDict if isinstance(o, OrderedDict) else dict
                         if any(kw in o for kw in EJSON_KEYWORDS):
-                            return {"$escape": {k: _encode(v) for k, v in o.items()}}
-                        return {k: _encode(v) for k, v in o.items()}
+                            return {"$escape": dict_cls((k, _encode(v)) for k, v in o.items())}
+                        return dict_cls((k, _encode(v)) for k, v in o.items())
                     else:
                         return [_encode(v) for v in o]
                 finally:
@@ -71,8 +73,8 @@ class EJSONEncoder(json.JSONEncoder):
             if six.PY3 and isinstance(o, six.binary_type):
                 return {"$binary": b64encode(o).decode()}
 
-            for cls, name, f in self.custom_type_hooks:
-                if isinstance(o, cls):
+            for dict_cls, name, f in self.custom_type_hooks:
+                if isinstance(o, dict_cls):
                     return {"$type": name, "$value": f(o)}
 
             return o
@@ -88,6 +90,8 @@ class EJSONDecoder(json.JSONDecoder):
 
     def _decode_escaped(self, o):
         if isinstance(o, dict):
+            if self.object_pairs_hook is not None:
+                return self.object_pairs_hook((k, self._decode(v)) for k, v in o.items())
             return {k: self._decode(v) for k, v in o.items()}
         return self._decode(o)
 
@@ -108,6 +112,8 @@ class EJSONDecoder(json.JSONDecoder):
 
                 return reviver(o["$value"])
 
+            if self.object_pairs_hook is not None:
+                return self.object_pairs_hook((k, self._decode(v)) for k, v in o.items())
             return {k: self._decode(v) for k, v in o.items()}
 
         if isinstance(o, (list, tuple)):

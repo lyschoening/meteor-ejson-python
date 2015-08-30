@@ -1,3 +1,4 @@
+from collections import OrderedDict
 import datetime
 import six
 import ejson
@@ -78,6 +79,27 @@ class EJSONTestCase(unittest.TestCase):
                          }, decoder.decode('{"foo": [{"$type": "pow", "$value": 5}, 1.23],'
                                            ' "things": {"$type": "set", "$value": [1, 1, 2, 4]}}'))
 
+    def test_orderd_dict_encode(self):
+        encoder = ejson.EJSONEncoder()
+
+        self.assertEqual('{"foo": 3, "bar": 1, "baz": {"$escape": {"$escape": true, "foo": "foo"}}}', encoder.encode(
+            OrderedDict([('foo', 3),
+                         ('bar', 1),
+                         ('baz', OrderedDict([
+                             ('$escape', True),
+                             ('foo', 'foo')
+                         ]))])))
+
+
+    def test_object_pairs_hook_decode(self):
+        decoder = ejson.EJSONDecoder(object_pairs_hook=OrderedDict)
+        obj = decoder.decode('{"foo": 1, "bar": {"$escape": {"$escape": true}}}')
+
+        self.assertEqual(OrderedDict([('foo', 1),
+                                      ('bar', OrderedDict([('$escape', True)]))]), obj)
+
+        self.assertIsInstance(obj, OrderedDict)
+        self.assertIsInstance(obj['bar'], OrderedDict)
 
 if __name__ == '__main__':
     unittest.main()
