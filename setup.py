@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='meteor-ejson',
-    version='1.0.0',
+    version='1.1.0',
     packages=find_packages(exclude=['*tests*']),
     url='https://github.com/lyschoening/meteor-ejson-python',
     license='MIT',
