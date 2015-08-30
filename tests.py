@@ -53,7 +53,7 @@ class EJSONTestCase(unittest.TestCase):
 
     def test_custom_type_encode(self):
         encoder = ejson.EJSONEncoder(custom_type_hooks=[
-            (set, 'set', list)
+            (set, 'set', sorted)
         ], sort_keys=True)
 
         self.assertEqual('{"foo": {"$type": "set", "$value": [1, 2, 3]}}', encoder.encode({
